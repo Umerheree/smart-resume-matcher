@@ -1,0 +1,6 @@
+Job Title: Python Developer
+Responsibilities:
+- Write clean, scalable code using Python.
+- Experience with libraries like pandas, numpy, and scikit-learn.
+- Strong understanding of algorithms and data structures.
+- Ability to debug and optimize code.

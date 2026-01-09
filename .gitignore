@@ -1,0 +1,17 @@
+# Ignore Virtual Environments
+parallel_env/
+env/
+venv/
+.conda/
+
+# Ignore Python Cache
+__pycache__/
+*.pyc
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Mac/Windows system files
+.DS_Store
+Thumbs.db
+
