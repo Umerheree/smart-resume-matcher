@@ -1,0 +1,11 @@
+# data/config.yaml
+taxonomy:
+  Frontend: ["react", "angular", "vue", "html", "css", "typescript", "javascript", "nextjs"]
+  Backend: ["python", "java", "node", "django", "flask", "fastapi", "golang", "ruby"]
+  Database: ["sql", "mysql", "postgresql", "mongodb", "redis", "firebase"]
+  Cloud/DevOps: ["aws", "azure", "docker", "kubernetes", "git", "jenkins", "terraform"]
+  Data/AI: ["machine learning", "nlp", "tensorflow", "pytorch", "pandas", "numpy", "scikit-learn"]
+
+settings:
+  scaling_factor: 400
+  perfect_match_threshold: 0.25

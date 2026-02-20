@@ -1,127 +1,222 @@
 import streamlit as st
-import os
-from src.pdf_reader import extract_text_from_pdf
-from src.text_cleaner import clean_text
-from src.matcher import calculate_match
-from src.skills import extract_skills
+import pandas as pd
+from views import recruiter_dashboard, candidate_feedback, admin_view
 
-# --- PAGE CONFIG (Must be first) ---
-st.set_page_config(page_title="AI Resume Matcher", page_icon="✨", layout="wide")
+# --- PAGE CONFIG ---
+st.set_page_config(
+    page_title="NexGen AI ATS",
+    page_icon="🎯",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# --- CUSTOM CSS FOR "PREMIUM" LOOK ---
+# --- CUSTOM CSS FOR PROFESSIONAL UI ---
 st.markdown("""
-    <style>
-    /* Remove standard Streamlit padding */
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+<style>
+    /* Main container styling */
+    .main {
+        padding: 2rem;
     }
-    /* Custom Card Style */
-    .stCard {
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-bottom: 15px;
-        border-left: 5px solid #4CAF50;
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
     }
-    /* Hide the default Streamlit menu/footer */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
+    
+    [data-testid="stSidebar"] .css-1d391kg, [data-testid="stSidebar"] .st-emotion-cache-1gulkj5 {
+        color: white;
+    }
+    
+    /* Sidebar text color */
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] .st-emotion-cache-16idsys p {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    /* Logo container */
+    .logo-container {
+        text-align: center;
+        padding: 1.5rem 0;
+        margin-bottom: 1rem;
+    }
+    
+    /* Brand styling */
+    .brand-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .brand-tagline {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    
+    /* Navigation styling */
+    .nav-section {
+        margin: 2rem 0 1.5rem 0;
+    }
+    
+    .nav-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Radio button styling for navigation */
+    [data-testid="stSidebar"] .row-widget.stRadio > div {
+        gap: 0.5rem;
+    }
+    
+    [data-testid="stSidebar"] .row-widget.stRadio > div > label {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-testid="stSidebar"] .row-widget.stRadio > div > label:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(4px);
+    }
+    
+    [data-testid="stSidebar"] .row-widget.stRadio > div > label[data-baseweb="radio"] > div:first-child {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Divider styling */
+    [data-testid="stSidebar"] hr {
+        margin: 1.5rem 0;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Footer styling - removed absolute positioning to prevent overlap */
+    
+    /* Page header */
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-description {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+    
+    /* Icons for navigation items */
+    .nav-icon {
+        margin-right: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- SIDEBAR NAVIGATION ---
+with st.sidebar:
+    # Logo and branding
+    st.markdown("""
+        <div class="logo-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="70" style="filter: brightness(0) invert(1);">
+            <div class="brand-title">NexGen AI ATS</div>
+            <div class="brand-tagline">Intelligent Talent Acquisition</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Navigation section
+    st.markdown('<div class="nav-label">🎯 WORKSPACE</div>', unsafe_allow_html=True)
+    
+    # Navigation menu with icons
+    navigation_options = {
+        "👥 Recruiter Dashboard": "Recruiter Dashboard",
+        "📊 Candidate Feedback": "Candidate Feedback",
+        "⚙️ System Administration": "System Administration"
+    }
+    
+    selected_display = st.radio(
+        "Navigate to",
+        list(navigation_options.keys()),
+        label_visibility="collapsed"
+    )
+    
+    # Map display name back to internal value
+    app_mode = navigation_options[selected_display]
+    
+    st.markdown("---")
+    
+    # Help section
+    with st.expander("ℹ️ Quick Guide", expanded=False):
+        st.markdown("""
+        **Recruiter Dashboard**  
+        Batch process resumes and rank candidates
+        
+        **Candidate Feedback**  
+        Get AI-powered resume optimization tips
+        
+        **System Admin**  
+        Manage skill taxonomy and scoring weights
+        """)
+    
+    st.markdown("---")
+    
+    # Footer
+    st.markdown("""
+        <div style="text-align: center; padding: 1rem 0;">
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; margin: 0;">Developed by</p>
+            <p style="color: white; font-weight: 600; font-size: 0.85rem; margin: 0.25rem 0 0 0;">Umer Mehboob</p>
+        </div>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR ---
-with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=50)
-    st.title("Settings")
-    
-    st.markdown("### 1. Job Description")
-    jd_input = st.text_area("Paste JD here:", height=250, help="Copy paste the job description from LinkedIn/Indeed.")
-    
-    if st.button("📄 Load Example JD"):
-        try:
-            with open("data/job_description.txt", "r", encoding='utf-8') as f:
-                jd_input = f.read()
-                st.toast("Example JD Loaded!", icon="✅")
-        except:
-            st.error("File not found.")
+# --- DYNAMIC VIEW ROUTING WITH PAGE HEADERS ---
+page_info = {
+    "Recruiter Dashboard": {
+        "title": "Recruiter Dashboard",
+        "description": "Batch process resumes, rank candidates, and make data-driven hiring decisions",
+        "icon": "👥"
+    },
+    "Candidate Feedback": {
+        "title": "Candidate Feedback Portal",
+        "description": "Receive personalized AI-powered recommendations to optimize your resume",
+        "icon": "📊"
+    },
+    "System Administration": {
+        "title": "System Administration",
+        "description": "Configure skill taxonomy, manage scoring weights, and customize ATS parameters",
+        "icon": "⚙️"
+    }
+}
 
-# --- MAIN LAYOUT ---
-st.title("✨ Smart Resume Matcher")
-st.markdown("##### Upload resumes to rank them by **AI relevance**.")
+# Display page header
+current_page = page_info[app_mode]
+st.markdown(f"""
+    <div class="page-header">
+        <div class="page-title">{current_page['icon']} {current_page['title']}</div>
+        <div class="page-description">{current_page['description']}</div>
+    </div>
+""", unsafe_allow_html=True)
 
-uploaded_files = st.file_uploader("Drop PDF Resumes Here", type=["pdf"], accept_multiple_files=True)
-
-if st.button("Analyze Candidates 🚀", type="primary"):
-    if not jd_input:
-        st.warning("⚠️ Please provide a Job Description in the sidebar.")
-    elif not uploaded_files:
-        st.warning("⚠️ Upload at least one resume.")
-    else:
-        with st.spinner("Reading & Comparing..."):
-            # 1. Processing
-            cleaned_jd = clean_text(jd_input)
-            jd_skills = extract_skills(cleaned_jd)
-            
-            resume_texts = []
-            filenames = []
-            
-            for f in uploaded_files:
-                text = extract_text_from_pdf(f)
-                if text:
-                    resume_texts.append(clean_text(text))
-                    filenames.append(f.name)
-            
-            if resume_texts:
-                scores = calculate_match(cleaned_jd, resume_texts)
-                
-                # 2. Structure Data
-                results = []
-                for i, filename in enumerate(filenames):
-                    resume_skills = extract_skills(resume_texts[i])
-                    matched_skills = set(resume_skills).intersection(set(jd_skills))
-                    score = scores[i]['total']
-                    
-                    results.append({
-                        "name": filename,
-                        "score": score,
-                        "matched_skills": list(matched_skills),
-                        "missing_skills": list(set(jd_skills) - matched_skills)
-                    })
-                
-                # Sort by score
-                results.sort(key=lambda x: x['score'], reverse=True)
-                
-                # 3. DISPLAY RESULTS (The Premium Part)
-                st.success(f"Analyzed {len(results)} candidates successfully!")
-                
-                st.subheader("🏆 Top Candidates")
-                
-                for res in results:
-                    # Create a "Card" using Columns
-                    with st.container():
-                        c1, c2, c3 = st.columns([1, 4, 2])
-                        
-                        with c1:
-                            st.markdown(f"## {res['score']}%")
-                            st.caption("Match Score")
-                        
-                        with c2:
-                            st.markdown(f"### 📄 {res['name']}")
-                            if res['matched_skills']:
-                                st.write("✅ **Skills:** " + ", ".join([s.upper() for s in res['matched_skills']]))
-                            else:
-                                st.write("⚠️ No specific skills matched.")
-                                
-                        with c3:
-                            # Visual Progress Bar
-                            st.progress(res['score'] / 100)
-                            if res['score'] > 75:
-                                st.markdown("🌟 **Excellent Match**")
-                            elif res['score'] > 50:
-                                st.markdown("👍 **Good Match**")
-                            else:
-                                st.markdown("📉 **Low Match**")
-                        
-                        st.divider()
+# Route to appropriate view
+if app_mode == "Recruiter Dashboard":
+    recruiter_dashboard.render()
+elif app_mode == "Candidate Feedback":
+    candidate_feedback.render()
+elif app_mode == "System Administration":
+    admin_view.render()

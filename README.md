@@ -1,36 +1,37 @@
-# 🚀 AI Smart Resume Matcher
+# 🎯 NexGen AI ATS: Pro-Grade Resume Matcher & Analytics Platform
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
-![Scikit-Learn](https://img.shields.io/badge/Library-Scikit--Learn-orange)
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat&logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-red?style=flat&logo=streamlit)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-NLP-orange?style=flat&logo=scikit-learn)
+![YAML](https://img.shields.io/badge/Config-YAML-lightgrey?style=flat&logo=yaml)
 
-An intelligent recruiting tool that parses resumes, extracts skills, and ranks candidates based on job descriptions using **NLP (TF-IDF & Cosine Similarity)**. 
+NexGen AI ATS is an enterprise-ready recruiting platform designed to automate talent acquisition. By leveraging advanced **NLP (TF-IDF Vectorization)** and a **Hybrid Similarity Engine (Cosine & Jaccard)**, it ranks candidates with high precision while providing actionable feedback for both recruiters and applicants.
 
-Designed to mimic how Applicant Tracking Systems (ATS) filter candidates, providing a visual match score and missing skills report.
+## 📸 Platform Interface
+![NexGen AI ATS Dashboard](image.png)
+![NexGen AI ATS Dashboard](image1.png)
+![NexGen AI ATS Dashboard](image2.png)
+![NexGen AI ATS Dashboard](image3.png)
+![NexGen AI ATS Dashboard](system.png)
+![NexGen AI ATS Dashboard](candidate.png)
+## ✨ Advanced Engineering Features
+- **🏢 Multi-Persona Workspaces:** Dedicated logic for **Recruiters** (batch processing), **Candidates** (optimization feedback), and **Admins** (system tuning).
+- **🧠 Hybrid Matching Engine:** A sophisticated blend of semantic context (Cosine) and exact keyword matching (Jaccard) with dynamic weighting.
+- **🔍 Intelligent Deep Parsing:** The `ResumeParser` uses advanced Regex patterns to segment resumes into Experience, Education, Skills, and Projects for granular analysis.
+- **⚙️ Dynamic System Configuration:** Full administrative control over the skill taxonomy and scoring weights via a `config.yaml` interface—no code changes required.
+- **📊 Candidate Gap Analysis:** Provides instant "Skills Gap" visualizations and priority-coded recommendations to help candidates align their profiles with job requirements.
 
-## 📸 Interface
-![UI interface](image.png)
+## 📂 Modular System Architecture
+The project follows a scalable, production-ready structure to separate core logic from UI components:
 
-## ✨ Key Features
-- **🧠 AI-Powered Ranking:** Uses TF-IDF vectorization to understand the semantic importance of words.
-- **📊 Interactive Dashboard:** Built with **Streamlit** for real-time analysis and easy drag-and-drop.
-- **🔍 Skill Extraction:** Automatically detects technical skills (Python, SQL, React, etc.) and compares them against the JD.
-- **⚡ Instant Feedback:** Provides a percentage match score and highlights missing keywords.
-- **📄 PDF Support:** Robust text extraction from modern PDF resumes.
-
-## 📂 Project Structure
 ```text
-resume-matcher/
-├── data/
-│   └── job_description.txt  # Default JD for testing
-├── src/
-│   ├── matcher.py           # Core logic (Cosine Similarity)
-│   ├── pdf_reader.py        # PDF text extraction
-│   ├── skills.py            # Skill database & extractor
-│   └── text_cleaner.py      # NLP preprocessing
-├── app_ui.py                # Streamlit Frontend
-├── main.py                  # CLI version (optional)
-└── requirements.txt         # Dependencies
+resume-job-matcher/
+├── core/               # Matching engine, NLP parsing, and skill extraction logic
+├── views/              # Multi-page Streamlit dashboards (Recruiter, Candidate, Admin)
+├── utils/              # Text normalization and Regex contact extraction utilities
+├── data/               # Persistent storage for config.yaml and job descriptions
+├── app_ui.py           # Main application entry point & routing engine
+└── requirements.txt    # Production dependencies
 
 🛠️ Installation
 Clone the repository
@@ -49,14 +50,19 @@ Run the Application
 Bash
 
 streamlit run app_ui.py
-🧩 How It Works
-Preprocessing: Cleans text by removing special characters and stop words.
 
-Feature Extraction: Converts text into numerical vectors using TF-IDF.
+🧩 Technical Deep Dive: How It Works
+Extraction Pipeline: The system utilizes pypdf to extract raw text, which is then cleaned via custom Regex to remove noise and normalize casing.
 
-Similarity Calculation: Measures the cosine angle between the JD vector and Resume vector.
+Contact Extraction: An automated utility scans the full text using localized patterns to isolate emails and phone numbers.
 
-Skill Matching: Cross-references text against a curated database of 500+ tech skills.
+Similarity Blending: The engine calculates two independent scores:
+
+Cosine Similarity: Measures semantic context via TF-IDF vectors.
+
+Jaccard Index: Measures exact set-based keyword overlap for technical skills.
+
+Explainability: The system reveals the "Top Contributing Keywords," allowing recruiters to understand exactly why a candidate received their specific score.
 
 👨‍💻 Author
 Umer Mehboob Aspiring Software Engineer & CS Student 
